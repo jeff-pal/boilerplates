@@ -1,0 +1,26 @@
+sudo cp /usr/lib/ssl/openssl.cnf ./
+
+sudo openssl req \
+   -x509 -nodes -days 365 -newkey rsa:2048 \
+   -subj "/CN=localhost" \
+   -config openssl.cnf \
+   -keyout self-signed.key \
+   -out self-signed.crt
+
+sudo openssl dhparam --out dhparam.pem 128
+
+sudo cp self-signed.crt /etc/ssl/certs/self-signed.crt
+sudo cp self-signed.key /etc/ssl/private/self-signed.key
+sudo cp dhparam.pem /etc/ssl/certs/dhparam.pem
+
+certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n "self-signed" -i self-signed.crt
+
+sudo service nginx restart
+
+cd /etc/nginx/snippets/
+sudo nano self-signed.conf
+sudo nano ssl-params.conf
+
+cd /etc/nginx
+sudo rm nginx.conf
+sudo nano nginx.conf
